@@ -2,7 +2,9 @@ package xyz.phanta.aquinasmc.event;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
@@ -10,17 +12,21 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 import xyz.phanta.aquinasmc.capability.DXCapabilities;
 import xyz.phanta.aquinasmc.capability.ProxyItem;
+import xyz.phanta.aquinasmc.constant.ResConst;
 import xyz.phanta.aquinasmc.item.base.ItemMultiSlot;
 
 import java.util.Objects;
 
 public class MultiSlotItemHandler {
+
+    private static final double OVERLAY_Z_INDEX = 299D;
 
     @SubscribeEvent
     public void onPickupItem(EntityItemPickupEvent event) {
@@ -70,16 +76,17 @@ public class MultiSlotItemHandler {
                     case QUICK_CRAFT: {
                         ItemStack held = inv.getItemStack();
                         if (slotIndex < 9) {
-                            if (held.isEmpty()) {
+                            if (held.getItem() instanceof ItemMultiSlot) {
+                                event.setCanceled(true);
+                            } else {
                                 ItemStack stack = inv.getStackInSlot(slotIndex);
                                 if (stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
                                     Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null))
                                             .onProxyDestroyed();
-                                    inv.setInventorySlotContents(slotIndex, ItemStack.EMPTY);
+                                    inv.setInventorySlotContents(slotIndex, held);
+                                    inv.setItemStack(ItemStack.EMPTY);
                                     event.setCanceled(true);
                                 }
-                            } else if (held.getItem() instanceof ItemMultiSlot) {
-                                event.setCanceled(true);
                             }
                         } else {
                             if (held.getItem() instanceof ItemMultiSlot) {
@@ -131,10 +138,15 @@ public class MultiSlotItemHandler {
                     }
                     case SWAP: {
                         ItemStack stack = inv.getStackInSlot(slotIndex);
+                        ItemStack swap = inv.getStackInSlot(event.data);
                         if (stack.getItem() instanceof ItemMultiSlot) {
-                            ItemMultiSlot item = (ItemMultiSlot)stack.getItem();
-                            item.createProxyStack(inv, item.getBaseSlot(slotIndex, stack.getMetadata()), event.data);
+                            if (swap.isEmpty() && !stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
+                                ItemMultiSlot item = (ItemMultiSlot)stack.getItem();
+                                item.createProxyStack(inv, item.getBaseSlot(slotIndex, stack.getMetadata()), event.data);
+                            }
                             event.setCanceled(true);
+                        } else if (swap.getItem() instanceof ItemMultiSlot) {
+                            inv.setInventorySlotContents(event.data, ItemStack.EMPTY);
                         }
                         break;
                     }
@@ -181,25 +193,104 @@ public class MultiSlotItemHandler {
     }
 
     @SubscribeEvent
-    public void onDrawGui(GuiScreenEvent.DrawScreenEvent.Post event) {
-        if (event.getGui() instanceof GuiContainer) {
+    public void onDrawTooltip(RenderTooltipEvent.Pre event) {
+        GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+        if (screen instanceof GuiContainer) {
+            GuiContainer gui = (GuiContainer)screen;
+            Slot slot = gui.getSlotUnderMouse();
             EntityPlayer player = Minecraft.getMinecraft().player;
-            Slot slot = ((GuiContainer)event.getGui()).getSlotUnderMouse();
             if (slot != null && slot.inventory == player.inventory) {
                 int slotIndex = slot.getSlotIndex();
+                ItemStack stack = player.inventory.getStackInSlot(slotIndex);
+                ItemStack held = player.inventory.getItemStack();
                 if (slotIndex >= 9) {
-                    ItemStack stack = player.inventory.getItemStack();
-                    if (stack.getItem() instanceof ItemMultiSlot) {
-                        ItemMultiSlot item = (ItemMultiSlot)stack.getItem();
-                        int baseX = event.getMouseX() - 8;
-                        int baseY = event.getMouseY() - 8;
-                        Gui.drawRect(baseX, baseY, baseX + 18 * item.getDimX() - 2, baseY + 18 * item.getDimY() - 2,
-                                item.fitsInSlot(player.inventory, slotIndex) ? 0x77FFFFFF : 0x4AFF0000);
-                        // TODO better multi slot indicator
+                    if (held.isEmpty()) {
+                        if (stack.getItem() instanceof ItemMultiSlot) {
+                            ItemMultiSlot item = (ItemMultiSlot)stack.getItem();
+                            int baseSlotIndex = item.getBaseSlot(slotIndex, stack.getMetadata());
+                            Slot baseSlot = gui.inventorySlots.getSlotFromInventory(player.inventory, baseSlotIndex);
+                            if (baseSlot != null) {
+                                drawSelection(gui, baseSlot, item.getDimX(), item.getDimY(), true);
+                            }
+                            for (int i = 0; i < 9; i++) {
+                                ItemStack proxyStack = player.inventory.getStackInSlot(i);
+                                if (proxyStack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
+                                    int proxyBaseSlotIndex = Objects.requireNonNull(
+                                            proxyStack.getCapability(DXCapabilities.PROXY_ITEM, null)).getBaseSlot();
+                                    if (proxyBaseSlotIndex == baseSlotIndex) {
+                                        Slot proxySlot = gui.inventorySlots.getSlotFromInventory(player.inventory, i);
+                                        if (proxySlot != null) {
+                                            drawSelection(gui, proxySlot, 1, 1, true);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (held.isEmpty() && stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
+                    ProxyItem proxy = Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null));
+                    Slot baseSlot = gui.inventorySlots.getSlotFromInventory(proxy.getInventory(), proxy.getBaseSlot());
+                    if (baseSlot != null) {
+                        ItemStack base = proxy.getInventory().getStackInSlot(proxy.getBaseSlot());
+                        if (base.getItem() instanceof ItemMultiSlot) {
+                            ItemMultiSlot item = (ItemMultiSlot)base.getItem();
+                            drawSelection(gui, baseSlot, item.getDimX(), item.getDimY(), true);
+                        } else {
+                            drawSelection(gui, baseSlot, 1, 1, true);
+                        }
                     }
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onDrawGui(GuiScreenEvent.DrawScreenEvent.Post event) {
+        if (event.getGui() instanceof GuiContainer) {
+            GuiContainer gui = (GuiContainer)event.getGui();
+            Slot slot = gui.getSlotUnderMouse();
+            EntityPlayer player = Minecraft.getMinecraft().player;
+            if (slot != null && slot.inventory == player.inventory) {
+                int slotIndex = slot.getSlotIndex();
+                ItemStack held = player.inventory.getItemStack();
+                if (slotIndex >= 9) {
+                    if (held.getItem() instanceof ItemMultiSlot) {
+                        ItemMultiSlot item = (ItemMultiSlot)held.getItem();
+                        drawSelection(gui, slot, item.getDimX(), item.getDimY(), item.fitsInSlot(player.inventory, slotIndex));
+                    }
+                }
+            }
+        }
+    }
+
+    private static void drawSelection(GuiContainer gui, Slot slot, int slotDimX, int slotDimY, boolean good) {
+        drawSelection(slot.xPos + gui.getGuiLeft(), slot.yPos + gui.getGuiTop(), slotDimX, slotDimY, good);
+    }
+
+    private static void drawSelection(double x, double y, int slotDimX, int slotDimY, boolean good) {
+        double x2 = x + slotDimX * 18 - 18;
+        double y2 = y + slotDimY * 18 - 18;
+        double offset = 1.5D + 0.5D * Math.sin(System.currentTimeMillis() / 160D);
+        x -= offset;
+        y -= offset;
+        x2 += offset;
+        y2 += offset;
+        GlStateManager.disableLighting();
+        GlStateManager.disableDepth();
+        GlStateManager.color(1F, 1F, 1F, 1F);
+        if (good) {
+            ResConst.OVERLAY_SELECTION_UL.draw(x, y, OVERLAY_Z_INDEX);
+            ResConst.OVERLAY_SELECTION_UR.draw(x2, y, OVERLAY_Z_INDEX);
+            ResConst.OVERLAY_SELECTION_LL.draw(x, y2, OVERLAY_Z_INDEX);
+            ResConst.OVERLAY_SELECTION_LR.draw(x2, y2, OVERLAY_Z_INDEX);
+        } else {
+            ResConst.OVERLAY_SELECTION_BAD_UL.draw(x, y, OVERLAY_Z_INDEX);
+            ResConst.OVERLAY_SELECTION_BAD_UR.draw(x2, y, OVERLAY_Z_INDEX);
+            ResConst.OVERLAY_SELECTION_BAD_LL.draw(x, y2, OVERLAY_Z_INDEX);
+            ResConst.OVERLAY_SELECTION_BAD_LR.draw(x2, y2, OVERLAY_Z_INDEX);
+        }
+        GlStateManager.enableDepth();
+        GlStateManager.enableLighting();
     }
 
 }
