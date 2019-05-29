@@ -1,0 +1,17 @@
+[
+{
+  "modid": "aquinas",
+  "name": "Aquinas",
+  "description": "Your appointment to FEMA will be finalized within the week.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["phantamanta44"],
+  "logoFile": "",
+  "screenshots": [],
+  "useDependencyInformation": true,
+  "dependencies": ["libnine"],
+  "requiredMods": ["libnine"]
+}
+]
