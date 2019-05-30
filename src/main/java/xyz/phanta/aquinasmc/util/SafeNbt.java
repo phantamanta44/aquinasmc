@@ -19,6 +19,20 @@ public class SafeNbt {
         tag.setInteger(key, value);
     }
 
+    public static boolean getBool(ItemStack stack, String key, boolean def) {
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag != null && tag.hasKey(key) ? tag.getBoolean(key) : def;
+    }
+
+    public static void setBool(ItemStack stack, String key, boolean value) {
+        NBTTagCompound tag = stack.getTagCompound();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+            stack.setTagCompound(tag);
+        }
+        tag.setBoolean(key, value);
+    }
+    
     public static String getString(ItemStack stack, String key, String def) {
         NBTTagCompound tag = stack.getTagCompound();
         return tag != null && tag.hasKey(key) ? tag.getString(key) : def;

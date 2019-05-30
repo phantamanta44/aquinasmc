@@ -9,5 +9,7 @@ public class NbtConst {
     public static final String PROXY_DEST_SLOT = "proxy_dest_slot";
     public static final String PROXY_PROXY_SLOT = "proxy_proxy_slot";
     public static final String PROXY_OWNER_ID = "proxy_owner_id";
+    public static final String MULTI_SLOT_PLACED = "multi_slot_placed";
+    public static final String AMMO_TYPE = "ammo_loaded_type";
 
 }

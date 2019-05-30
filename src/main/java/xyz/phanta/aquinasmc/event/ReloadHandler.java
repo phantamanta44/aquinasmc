@@ -18,11 +18,15 @@ public class ReloadHandler {
             NBTTagCompound tag = event.player.getEntityData();
             int selected = event.player.inventory.currentItem;
             if (tag.hasKey(NbtConst.PREV_HOTBAR)) {
-                int prev = tag.getInteger(NbtConst.PREV_HOTBAR);
-                if (prev != selected) {
-                    ItemStack stack = event.player.inventory.getStackInSlot(prev);
-                    if (stack.hasCapability(DXCapabilities.AMMO_USER, null)) {
-                        Objects.requireNonNull(stack.getCapability(DXCapabilities.AMMO_USER, null)).cancelReload(event.player);
+                int prevSlot = tag.getInteger(NbtConst.PREV_HOTBAR);
+                if (prevSlot != selected) {
+                    ItemStack prev = event.player.inventory.getStackInSlot(prevSlot);
+                    if (prev.hasCapability(DXCapabilities.AMMO_USER, null)) {
+                        Objects.requireNonNull(prev.getCapability(DXCapabilities.AMMO_USER, null)).cancelReload(event.player);
+                    }
+                    ItemStack curr = event.player.inventory.getStackInSlot(selected);
+                    if (curr.hasCapability(DXCapabilities.AMMO_USER, null)) {
+                        Objects.requireNonNull(curr.getCapability(DXCapabilities.AMMO_USER, null)).onEquipped(event.player);
                     }
                     tag.setInteger(NbtConst.PREV_HOTBAR, selected);
                     return;

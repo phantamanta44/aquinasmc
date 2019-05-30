@@ -121,6 +121,7 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
                         offY == 0 && offX == 0 ? stack : new ItemStack(this, 1, getMetaAtCoord(offX, offY)));
             }
         }
+        setItemPlaced(stack, true);
     }
 
     public void placeInSlot(InventoryPlayer inv, ItemStack stack, int slot) {
@@ -130,6 +131,7 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
                         offY == 0 && offX == 0 ? stack : new ItemStack(this, 1, getMetaAtCoord(offX, offY)));
             }
         }
+        setItemPlaced(stack, true);
     }
 
     public ItemStack clearFromSlot(InventoryPlayer inv, int slot) {
@@ -150,6 +152,7 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
                 }
             }
         }
+        setItemPlaced(baseStack, false);
         return baseStack;
     }
 
@@ -194,7 +197,9 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
     @Override
     public void getModelMutations(ItemStack stack, ParameterizedItemModel.Mutation m) {
         int meta = stack.getMetadata();
-        m.mutate("role", meta == 0 ? "base" : (meta == proxyMeta ? "proxy" : "ghost"));
+        m.mutate("role", meta == 0
+                ? (getItemPlaced(stack) ? "multi" : "single")
+                : (meta == proxyMeta ? "single" : "ghost"));
     }
 
     private static int getProxyDestination(ItemStack stack) {
@@ -219,6 +224,14 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
 
     private static void setProxyOwner(ItemStack stack, UUID id) {
         SafeNbt.setString(stack, NbtConst.PROXY_OWNER_ID, id.toString());
+    }
+
+    private static boolean getItemPlaced(ItemStack stack) {
+        return SafeNbt.getBool(stack, NbtConst.MULTI_SLOT_PLACED, false);
+    }
+
+    private static void setItemPlaced(ItemStack stack, boolean placed) {
+        SafeNbt.setBool(stack, NbtConst.MULTI_SLOT_PLACED, placed);
     }
 
     private static class InventoryProxy implements ProxyItem {

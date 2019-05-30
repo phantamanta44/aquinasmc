@@ -1,0 +1,35 @@
+{
+  "9s": "pi",
+  "archetype": {
+    "parent": "item/generated"
+  },
+  "mutations": {
+    "role": {
+      "single": {
+        "textures": {
+          "layer0": "aquinas:item/assault_gun/single"
+        }
+      },
+      "multi": {
+        "textures": {
+          "layer0": "aquinas:item/assault_gun/multi"
+        },
+        "display": {
+          "gui": {
+            "scale": [2, 2, 2],
+            "translation": [8, -8, 0]
+          }
+        }
+      },
+      "ghost": {
+        "parent": "aquinas:null"
+      }
+    },
+    "in_world": {
+      "true": {
+        "parent": "aquinas:item/assault_gun_model"
+      },
+      "false": {}
+    }
+  }
+}

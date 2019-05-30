@@ -1,0 +1,1 @@
+vert $1/multi.tga -alpha set -transparent '#ff00ff' -trim -gravity center -background transparent -extent 50x50 -filter point -resize 64x64 $1.png

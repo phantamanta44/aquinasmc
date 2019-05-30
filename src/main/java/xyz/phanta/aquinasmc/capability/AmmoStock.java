@@ -16,6 +16,10 @@ public interface AmmoStock {
 
     void cancelReload(EntityPlayer player);
 
+    void cycleAmmoType(EntityPlayer player);
+
+    void onEquipped(EntityPlayer player);
+
     class DefaultImpl implements AmmoStock {
 
         @Override
@@ -40,6 +44,16 @@ public interface AmmoStock {
 
         @Override
         public void cancelReload(EntityPlayer player) {
+            // NO-OP
+        }
+
+        @Override
+        public void cycleAmmoType(EntityPlayer player) {
+            // NO-OP
+        }
+
+        @Override
+        public void onEquipped(EntityPlayer player) {
             // NO-OP
         }
 

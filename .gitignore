@@ -17,3 +17,6 @@ gradle.properties
 /eclipse/
 /run/
 /libs/
+
+# transient files
+**/desktop.ini

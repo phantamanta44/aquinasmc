@@ -1,0 +1,100 @@
+{
+  "9s": "pi",
+  "archetype": {
+    "parent": "item/generated"
+  },
+  "mutations": {
+    "type": {
+      "AMMO_10MM": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_10mm"
+        }
+      },
+      "AMMO_HE": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_he"
+        }
+      },
+      "AMMO_762": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_762"
+        }
+      },
+      "AMMO_3006": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_3006"
+        }
+      },
+      "AMMO_DARTS_FLARE": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_darts_flare"
+        }
+      },
+      "AMMO_DARTS_NORMAL": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_darts_normal"
+        }
+      },
+      "AMMO_DARTS_POISON": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_darts_poison"
+        }
+      },
+      "AMMO_NAPALM": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_napalm"
+        }
+      },
+      "AMMO_PEPPER": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_pepper"
+        }
+      },
+      "AMMO_PLASMA": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_plasma"
+        }
+      },
+      "AMMO_PROD": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_prod"
+        }
+      },
+      "AMMO_ROCKETS": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_rockets"
+        }
+      },
+      "AMMO_SABOT": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_sabot"
+        }
+      },
+      "AMMO_SHELLS": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_shells"
+        }
+      },
+      "AMMO_WPROCKETS": {
+        "textures": {
+          "layer0": "aquinas:item/ammo_wprockets"
+        }
+      },
+      "AUG_UPGRADE": {
+        "textures": {
+          "layer0": "aquinas:item/aug_upgrade"
+        }
+      },
+      "VIAL_AMBROSIA": {
+        "textures": {
+          "layer0": "aquinas:item/vial_ambrosia"
+        }
+      },
+      "DX_LOGO": {
+        "textures": {
+          "layer0": "aquinas:item/dx_icon"
+        }
+      }
+    }
+  }
+}

@@ -1,11 +1,12 @@
 package xyz.phanta.aquinasmc.item.base;
 
 import io.github.phantamanta44.libnine.capability.provider.CapabilityBroker;
+import io.github.phantamanta44.libnine.client.model.ParameterizedItemModel;
 import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import io.github.phantamanta44.libnine.util.world.WorldUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
@@ -14,7 +15,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -22,7 +22,10 @@ import xyz.phanta.aquinasmc.Aquinas;
 import xyz.phanta.aquinasmc.capability.AmmoStock;
 import xyz.phanta.aquinasmc.capability.DXCapabilities;
 import xyz.phanta.aquinasmc.constant.NbtConst;
+import xyz.phanta.aquinasmc.engine.weapon.WeaponModel;
+import xyz.phanta.aquinasmc.engine.weapon.ammo.AmmoType;
 import xyz.phanta.aquinasmc.network.PacketClientWeaponFire;
+import xyz.phanta.aquinasmc.sound.DXSounds;
 import xyz.phanta.aquinasmc.util.SafeNbt;
 
 import javax.annotation.Nullable;
@@ -30,7 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class ItemWeapon extends ItemMultiSlot {
+public class ItemWeapon extends ItemMultiSlot {
+
+    @SuppressWarnings("NullableProblems")
+    private WeaponModel model;
+
+    public ItemWeapon(WeaponModel model) {
+        this(model.getName(), model.getDimX(), model.getDimY());
+        this.model = model;
+    }
 
     public ItemWeapon(String name, int dimX, int dimY) {
         super(name, dimX, dimY);
@@ -40,6 +51,12 @@ public abstract class ItemWeapon extends ItemMultiSlot {
     public CapabilityBroker initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
         return super.initCapabilities(stack, nbt)
                 .with(DXCapabilities.AMMO_USER, new WeaponAmmoStock(this, stack));
+    }
+
+    @Override
+    public void getModelMutations(ItemStack stack, @Nullable World world, @Nullable EntityLivingBase holder, ParameterizedItemModel.Mutation m) {
+        super.getModelMutations(stack, m);
+        m.mutate("in_world", world != null ? "true" : "false");
     }
 
     @Override
@@ -93,6 +110,10 @@ public abstract class ItemWeapon extends ItemMultiSlot {
         return super.onDroppedByPlayer(item, player);
     }
 
+    private void onEquipped(EntityPlayer player, ItemStack stack) {
+        model.onEquipped(player, stack);
+    }
+
     @Override
     public void onProxyDestroyed(EntityPlayer player, int slot, ItemStack stack) {
         cancelReload(player, stack);
@@ -137,55 +158,64 @@ public abstract class ItemWeapon extends ItemMultiSlot {
     private void cancelReload(EntityPlayer player, ItemStack stack) {
         stack = proxy(player.inventory, stack);
         if (getReloadTime(stack) != 0) {
-            IItemHandler inv = Objects.requireNonNull(
-                    player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
-            List<ItemStack> ammoStacks = getReloadAmmoStacks(stack);
-            Vec3d playerPos = player.getPositionVector();
-            int i = 0;
-            while (i < ammoStacks.size()) {
-                ItemStack remaining = ItemHandlerHelper.insertItem(inv, ammoStacks.get(i), false);
-                ++i;
-                if (!remaining.isEmpty()) {
-                    WorldUtils.dropItem(player.world, playerPos, remaining);
-                    break;
-                }
-            }
-            for (; i < ammoStacks.size(); i++) {
-                WorldUtils.dropItem(player.world, playerPos, ammoStacks.get(i));
-            }
+            giveAllStacks(player, getAmmoStacks(stack, getReloadAmmo(stack)));
             setReloadAmmo(stack, 0);
             setReloadTime(stack, 0);
         }
     }
 
-    public List<ItemStack> getReloadAmmoStacks(ItemStack stack) {
-        int ammo = getReloadAmmo(stack);
-        ItemStack ammoStack = getAmmoType(stack).getVisual();
-        int maxStackSize = ammoStack.getMaxStackSize();
+    protected void cycleAmmoType(EntityPlayer player, ItemStack stack) {
+        stack = proxy(player.inventory, stack);
+        AmmoType newType = model.getNextAmmoType(player, stack);
+        if (newType != null) {
+            cancelReload(player, stack);
+            giveAllStacks(player, getAmmoStacks(stack, getAmmoCount(stack)));
+            setAmmoCount(stack, 0);
+            model.setAmmoType(stack, newType);
+            reload(player, stack);
+        }
+    }
+
+    protected int getMaxAmmo(ItemStack stack) {
+        return model.getAmmoType(stack).getMaxAmmo();
+    }
+
+    protected IDisplayableMatcher<ItemStack> getAmmoType(ItemStack stack) {
+        AmmoType ammoType = model.getAmmoType(stack);
+        return IDisplayableMatcher.of(() -> ammoType.getAmmoStack(1), ammoType::isValidAmmo);
+    }
+
+    private List<ItemStack> getAmmoStacks(ItemStack weapon, int total) {
+        ItemStack stack = getAmmoType(weapon).getVisual();
+        int maxStackSize = stack.getMaxStackSize();
         List<ItemStack> stacks = new ArrayList<>();
-        while (ammo != 0) {
-            int qty = Math.min(ammo, maxStackSize);
-            stacks.add(ItemHandlerHelper.copyStackWithSize(ammoStack, qty));
-            ammo -= qty;
+        while (total != 0) {
+            int qty = Math.min(total, maxStackSize);
+            stacks.add(ItemHandlerHelper.copyStackWithSize(stack, qty));
+            total -= qty;
         }
         return stacks;
     }
 
-    protected abstract int getMaxAmmo(ItemStack stack);
+    protected void fire(EntityPlayer player, ItemStack stack) {
+        model.getAmmoType(stack).fire(player, stack);
+    }
 
-    protected abstract IDisplayableMatcher<ItemStack> getAmmoType(ItemStack stack);
+    protected int getReloadDuration(EntityPlayer player, ItemStack stack) {
+        return model.getReloadTime(player, stack);
+    }
 
-    protected abstract void fire(EntityPlayer player, ItemStack stack);
+    protected void onReloadStarted(EntityPlayer player, ItemStack stack) {
+        model.onReloadStart(player, stack);
+    }
 
-    protected abstract int getReloadDuration(EntityPlayer player, ItemStack stack);
-
-    protected abstract void onReloadStarted(EntityPlayer player, ItemStack stack);
-
-    protected abstract void onReloadFinished(EntityPlayer player, ItemStack stack);
+    protected void onReloadFinished(EntityPlayer player, ItemStack stack) {
+        model.onReloadEnd(player, stack);
+    }
 
     protected void onReloadFailed(EntityPlayer player, ItemStack stack) {
         player.world.playSound(player, player.posX, player.posY, player.posZ,
-                SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.PLAYERS, 1F, 2F);
+                DXSounds.WEAPON_EMPTY_GUN, SoundCategory.PLAYERS, 1F, 1F);
     }
 
     private static int getAmmoCount(ItemStack stack) {
@@ -210,6 +240,24 @@ public abstract class ItemWeapon extends ItemMultiSlot {
 
     private static void setReloadAmmo(ItemStack stack, int count) {
         SafeNbt.setInt(stack, NbtConst.RELOAD_AMMO, count);
+    }
+
+    private static void giveAllStacks(EntityPlayer player, List<ItemStack> ammoStacks) {
+        IItemHandler inv = Objects.requireNonNull(
+                player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
+        Vec3d playerPos = player.getPositionVector();
+        int i = 0;
+        while (i < ammoStacks.size()) {
+            ItemStack remaining = ItemHandlerHelper.insertItem(inv, ammoStacks.get(i), false);
+            ++i;
+            if (!remaining.isEmpty()) {
+                WorldUtils.dropItem(player.world, playerPos, remaining);
+                break;
+            }
+        }
+        for (; i < ammoStacks.size(); i++) {
+            WorldUtils.dropItem(player.world, playerPos, ammoStacks.get(i));
+        }
     }
 
     private static class WeaponAmmoStock implements AmmoStock {
@@ -245,6 +293,16 @@ public abstract class ItemWeapon extends ItemMultiSlot {
         @Override
         public void cancelReload(EntityPlayer player) {
             item.cancelReload(player, stack);
+        }
+
+        @Override
+        public void cycleAmmoType(EntityPlayer player) {
+            item.cycleAmmoType(player, stack);
+        }
+
+        @Override
+        public void onEquipped(EntityPlayer player) {
+            item.onEquipped(player, stack);
         }
 
     }

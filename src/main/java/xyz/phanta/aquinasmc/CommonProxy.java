@@ -6,12 +6,14 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import xyz.phanta.aquinasmc.event.MultiSlotItemHandler;
 import xyz.phanta.aquinasmc.event.ReloadHandler;
+import xyz.phanta.aquinasmc.sound.DXSounds;
 
 public class CommonProxy {
 
     public void onPreInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ReloadHandler());
         MinecraftForge.EVENT_BUS.register(new MultiSlotItemHandler());
+        MinecraftForge.EVENT_BUS.register(new DXSounds());
     }
 
     public void onInit(FMLInitializationEvent event) {

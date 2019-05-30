@@ -1,0 +1,41 @@
+{
+  "aquinas.weapon.misc.empty_gun": {
+    "sounds": [
+      "aquinas:weapon/empty_gun"
+    ]
+  },
+  "aquinas.weapon.misc.shell_casing": {
+    "sounds": [
+      "aquinas:weapon/shell_casing"
+    ]
+  },
+  "aquinas.weapon.assault_gun.fire.762": {
+    "sounds": [
+      "aquinas:weapon/assault_gun/fire_762_1",
+      "aquinas:weapon/assault_gun/fire_762_2",
+      "aquinas:weapon/assault_gun/fire_762_3",
+      "aquinas:weapon/assault_gun/fire_762_4",
+      "aquinas:weapon/assault_gun/fire_762_5"
+    ]
+  },
+  "aquinas.weapon.assault_gun.fire.he": {
+    "sounds": [
+      "aquinas:weapon/assault_gun/fire_he"
+    ]
+  },
+  "aquinas.weapon.assault_gun.reload.start": {
+    "sounds": [
+      "aquinas:weapon/assault_gun/reload_start"
+    ]
+  },
+  "aquinas.weapon.assault_gun.reload.end": {
+    "sounds": [
+      "aquinas:weapon/assault_gun/reload_end"
+    ]
+  },
+  "aquinas.weapon.assault_gun.equip": {
+    "sounds": [
+      "aquinas:weapon/assault_gun/equip"
+    ]
+  }
+}

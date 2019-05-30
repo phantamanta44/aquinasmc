@@ -1,3 +1,26 @@
+itemGroup.aquinas=Aquinas
+
+item.aquinas:misc0.name=10mm Ammo
+item.aquinas:misc1.name=20mm HE Ammo
+item.aquinas:misc2.name=7.62x51mm Ammo
+item.aquinas:misc3.name=30.06 Ammo
+item.aquinas:misc4.name=Flare Dart
+item.aquinas:misc5.name=Dart
+item.aquinas:misc6.name=Tranquilizer Dart
+item.aquinas:misc7.name=Napalm Canister
+item.aquinas:misc8.name=Pepper Cartridge
+item.aquinas:misc9.name=Plasma Clip
+item.aquinas:misc10.name=Prod Charger
+item.aquinas:misc11.name=Rocket
+item.aquinas:misc12.name=12-Gauge Sabot Shell
+item.aquinas:misc13.name=12-Gauge Buckshot Shell
+item.aquinas:misc14.name=WP Rocket
+item.aquinas:misc15.name=Augmentation Upgrade Canister
+item.aquinas:misc16.name=Ambrosia Vial
+item.aquinas.misc17.name=Orange Soda
+
 item.aquinas:assault_gun.name=Assault Rifle
 
+key.categories.aquinas=Aquinas
 aquinas.keybind.reload=Reload Weapon
+aquinas.keybind.change_ammo=Change Ammo Type
