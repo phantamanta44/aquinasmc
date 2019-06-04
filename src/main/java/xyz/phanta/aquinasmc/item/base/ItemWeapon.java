@@ -5,6 +5,7 @@ import io.github.phantamanta44.libnine.client.model.ParameterizedItemModel;
 import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import io.github.phantamanta44.libnine.util.world.WorldUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBiped;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -21,6 +22,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import xyz.phanta.aquinasmc.Aquinas;
 import xyz.phanta.aquinasmc.capability.AmmoStock;
 import xyz.phanta.aquinasmc.capability.DXCapabilities;
+import xyz.phanta.aquinasmc.client.event.WeaponRenderPassHandler;
 import xyz.phanta.aquinasmc.client.model.DXModel;
 import xyz.phanta.aquinasmc.constant.NbtConst;
 import xyz.phanta.aquinasmc.engine.weapon.WeaponModel;
@@ -34,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ItemWeapon extends ItemMultiSlot {
+public class ItemWeapon extends ItemMultiSlot implements ArmRotator {
 
     @SuppressWarnings("NullableProblems")
     private WeaponModel model;
@@ -62,13 +64,22 @@ public class ItemWeapon extends ItemMultiSlot {
         super.getModelMutations(stack, m);
         if (world != null) {
             if (holder != null) {
-                m.mutate("in_world", "true");
+                if (holder == Minecraft.getMinecraft().player) {
+                    m.mutate("in_world", WeaponRenderPassHandler.isRenderingFirstPersonHand() ? "first" : "third");
+                } else {
+                    m.mutate("in_world", "third");
+                }
             } else {
-                m.mutate("in_world", "false").mutate("role", "multi");
+                m.mutate("in_world", "none").mutate("role", "multi");
             }
         } else {
-            m.mutate("in_world", "false");
+            m.mutate("in_world", holder == null ? "none" : "none");
         }
+    }
+
+    @Override
+    public ModelBiped.ArmPose getArmPose(EntityPlayer player, ItemStack stack) {
+        return ModelBiped.ArmPose.BOW_AND_ARROW;
     }
 
     @Override

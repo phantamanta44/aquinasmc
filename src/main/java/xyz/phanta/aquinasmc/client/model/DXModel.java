@@ -43,12 +43,13 @@ public class DXModel implements IModel {
     private final Map<String, DXModelSeq> sequences;
     private final Collection<ResourceLocation> deps;
     private final DXModelLoader loader;
+    private final boolean stateless;
     private final int[] skinStateProducts;
 
     DXModel(DXModelVertData vertData, DXModelAnivData anivData, Vec3d posePos, Vec3d poseRot, Vec3d scale,
-                   Map<String, ResourceLocation> textures, ResourceLocation particleTexture,
-                   List<DXModelMultiSkin> skins, Map<String, DXModelSeq> sequences,
-                   Collection<ResourceLocation> deps, DXModelLoader loader) {
+            Map<String, ResourceLocation> textures, ResourceLocation particleTexture,
+            List<DXModelMultiSkin> skins, Map<String, DXModelSeq> sequences,
+            Collection<ResourceLocation> deps, DXModelLoader loader, boolean stateless) {
         this.vertData = vertData;
         this.anivData = anivData;
         this.posePos = posePos;
@@ -60,6 +61,7 @@ public class DXModel implements IModel {
         this.sequences = sequences;
         this.deps = deps;
         this.loader = loader;
+        this.stateless = stateless;
         this.skinStateProducts = new int[skins.size()];
         skinStateProducts[0] = skins.get(0).getStateCount();
         for (int i = 1; i < skinStateProducts.length; i++) {
@@ -199,22 +201,29 @@ public class DXModel implements IModel {
                     return frames[0][0];
                 }
                 long currentTime = System.currentTimeMillis();
-                DXModelState state = DXModelState.lookup(modelItem.getIdentifier(player), currentTime, skins.size());
-                state.advanceSkinStates(currentTime, skins);
+                DXModelState state = DXModelState.lookup(modelItem.getIdentifier(player), currentTime);
                 float grad = 0F;
-                if (state.checkActionIndex(modelItem.getActionIndex(player))) {
-                    state.update(modelItem, player, currentTime, sequences);
+                if (stateless) {
+                    grad = Math.min(state.getPartialFrame(currentTime), 1F);
                 } else {
-                    grad = state.advance(currentTime, sequences);
+                    if (state.checkActionIndex(modelItem.getActionIndex(player))) {
+                        state.updateSequence(modelItem, player, currentTime, sequences);
+                    } else {
+                        grad = state.advance(currentTime, sequences);
+                    }
+                }
+                state.advanceSkinStates(currentTime, skins);
+                if (state.checkSkinStateIndex(modelItem.getSkinStateIndex(player))) {
+                    state.updateSkinState(modelItem, player, currentTime, skins.size());
                 }
                 int skinState = state.getSkinState(0);
                 for (int i = 1; i < skins.size(); i++) {
                     skinState += Math.min(state.getSkinState(i), skins.get(i).getStateCount() - 1) * skinStateProducts[i - 1];
                 }
                 if (DXClientConfig.modelAnimDynRender) {
-                    List<DXModelQuad> thisFrame = unbakedFrames[skinState][state.getFrame()];
-                    List<DXModelQuad> nextFrame = unbakedFrames[skinState][
-                            state.getNextFrame(sequences) % unbakedFrames[skinState].length];
+                    int lastFrame = unbakedFrames[skinState].length - 1;
+                    List<DXModelQuad> thisFrame = unbakedFrames[skinState][Math.min(state.getFrame(), lastFrame)];
+                    List<DXModelQuad> nextFrame = unbakedFrames[skinState][Math.min(state.getNextFrame(sequences), lastFrame)];
                     int light = loader.getLighting();
                     float lr = ((light >> 16) & 0xFF) / 255F;
                     float lg = ((light >> 8) & 0xFF) / 255F;
@@ -252,8 +261,13 @@ public class DXModel implements IModel {
                     int next = -1;
                     for (DXModelSeq seq : sequences.values()) {
                         if (startFrame == seq.getEndFrame() - 1) {
-                            String nextSeq = seq.getNextSequence();
-                            next = (nextSeq != null ? sequences.get(nextSeq) : seq).getStartFrame();
+                            String nextSeqName = seq.getNextSequence();
+                            if (nextSeqName != null) {
+                                DXModelSeq nextSeq = sequences.get(nextSeqName);
+                                next = (nextSeq != null ? nextSeq : seq).getStartFrame();
+                            } else {
+                                next = seq.getStartFrame();
+                            }
                             break;
                         }
                     }
@@ -347,6 +361,8 @@ public class DXModel implements IModel {
 
         byte getActionIndex(@Nullable EntityPlayer player);
 
+        byte getSkinStateIndex(@Nullable EntityPlayer player);
+
         class Impl implements DXModelItem {
 
             private final UUID id = UUID.randomUUID();
@@ -384,6 +400,11 @@ public class DXModel implements IModel {
 
             @Override
             public byte getActionIndex(@Nullable EntityPlayer player) {
+                return 0;
+            }
+
+            @Override
+            public byte getSkinStateIndex(@Nullable EntityPlayer player) {
                 return 0;
             }
 
@@ -439,12 +460,20 @@ public class DXModel implements IModel {
 
             @Override
             public void setSkinState(@Nullable EntityPlayer player, int skin, int state) {
-                getTag().getCompoundTag(NbtConst.ANIM_SKIN_STATES).setInteger(Integer.toString(skin), state);
+                NBTTagCompound tag = getTag();
+                tag.getCompoundTag(NbtConst.ANIM_SKIN_STATES).setInteger(Integer.toString(skin), state);
+                byte skinStateIndex = tag.getByte(NbtConst.ANIM_SKIN_STATE_INDEX);
+                tag.setByte(NbtConst.ANIM_SKIN_STATE_INDEX, ++skinStateIndex);
             }
 
             @Override
             public byte getActionIndex(@Nullable EntityPlayer player) {
                 return getTag().getByte(NbtConst.ANIM_STATE_INDEX);
+            }
+
+            @Override
+            public byte getSkinStateIndex(@Nullable EntityPlayer player) {
+                return getTag().getByte(NbtConst.ANIM_SKIN_STATE_INDEX);
             }
 
             private NBTTagCompound getTag() {
@@ -457,6 +486,7 @@ public class DXModel implements IModel {
                     NBTTagCompound stateTag = new NBTTagCompound();
                     stateTag.setString(NbtConst.ANIM_STATE_ID, UUID.randomUUID().toString());
                     stateTag.setByte(NbtConst.ANIM_STATE_INDEX, (byte)0);
+                    stateTag.setByte(NbtConst.ANIM_SKIN_STATE_INDEX, (byte)0);
                     NBTTagCompound skinState = new NBTTagCompound();
                     skinState.setInteger("0", 0);
                     stateTag.setTag(NbtConst.ANIM_SKIN_STATES, skinState);

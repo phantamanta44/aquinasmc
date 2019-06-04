@@ -347,6 +347,11 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
             return getDelegate(player).getActionIndex(player);
         }
 
+        @Override
+        public byte getSkinStateIndex(@Nullable EntityPlayer player) {
+            return getDelegate(player).getSkinStateIndex(player);
+        }
+
     }
 
 }

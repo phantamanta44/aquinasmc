@@ -12,7 +12,9 @@ public class DXCoreMod implements IFMLLoadingPlugin {
     public String[] getASMTransformerClass() {
         return new String[] {
                 SlotClickTransformer.class.getCanonicalName(),
-                PlayerDiggingTransformer.class.getCanonicalName()
+                PlayerDiggingTransformer.class.getCanonicalName(),
+                ArmRotationTransformer.class.getCanonicalName(),
+                ModelLightingTransformer.class.getCanonicalName()
         };
     }
 

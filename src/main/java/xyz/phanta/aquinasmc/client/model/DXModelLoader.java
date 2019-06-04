@@ -67,6 +67,8 @@ public class DXModelLoader implements ICustomModelLoader {
             deps.add(anivFile);
         }
 
+        boolean stateless = modelDto.has("stateless") && modelDto.get("stateless").getAsBoolean();
+
         JsonObject poseDto = modelDto.get("pose").getAsJsonObject();
         Vec3d posePos = new Vec3d(
                 poseDto.get("x").getAsDouble(),
@@ -115,10 +117,11 @@ public class DXModelLoader implements ICustomModelLoader {
                     seqDto.has("next") ? seqDto.get("next").getAsString() : null));
         }
 
-        return new DXModel(vert, aniv, posePos, poseRot, scale, textures, particleTexture, skins, sequences, deps, this);
+        return new DXModel(vert, aniv, posePos, poseRot, scale,
+                textures, particleTexture, skins, sequences, deps, this, stateless);
     }
 
-    public void setLighting(int light) {
+    void setLighting(int light) {
         this.renderLight = light;
     }
 

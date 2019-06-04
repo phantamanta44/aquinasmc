@@ -16,5 +16,6 @@ public class NbtConst {
     public static final String ANIM_STATE_SEQ = "sequence";
     public static final String ANIM_STATE_INDEX = "action_index";
     public static final String ANIM_SKIN_STATES = "skin_states";
+    public static final String ANIM_SKIN_STATE_INDEX = "skin_state_index";
 
 }

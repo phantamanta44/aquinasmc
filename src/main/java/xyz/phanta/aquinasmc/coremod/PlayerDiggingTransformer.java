@@ -3,26 +3,9 @@ package xyz.phanta.aquinasmc.coremod;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.*;
 
+import static xyz.phanta.aquinasmc.coremod.TransNames.*;
+
 public class PlayerDiggingTransformer implements IClassTransformer {
-
-    private static final String CLNAME_EPLAYER = "net/minecraft/entity/player/EntityPlayer";
-    private static final String CLNAME_EPMP = "net/minecraft/entity/player/EntityPlayerMP";
-    private static final String CLNAME_PPD = "net/minecraft/network/play/client/CPacketPlayerDigging";
-
-    private static final String CLNAME_EVBUS = "net/minecraftforge/fml/common/eventhandler/EventBus";
-    private static final String MNAME_EVBUS_POST = "post";
-    private static final String MDESC_EVBUS_POST = "(Lnet/minecraftforge/fml/common/eventhandler/Event;)Z";
-
-    private static final String CLNAME_MCF = "net/minecraftforge/common/MinecraftForge";
-    private static final String FNAME_MCF_EVBUS = "EVENT_BUS";
-    private static final String FDESC_MCF_EVBUS = "L" + CLNAME_EVBUS + ";";
-
-    private static final String CLNAME_NHPS = "net/minecraft/network/NetHandlerPlayServer";
-    private static final String FNAME_NHPS_PLAYER = "player";
-    private static final String FDESC_NHPS_PLAYER = "L" + CLNAME_EPMP + ";";
-
-    private static final String CLNAME_PDE = "xyz/phanta/aquinasmc/event/PlayerDiggingEvent";
-    private static final String MDESC_PDE_INIT = String.format("(L%s;L%s;)V", CLNAME_EPLAYER, CLNAME_PPD);
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] code) {
@@ -36,14 +19,14 @@ public class PlayerDiggingTransformer implements IClassTransformer {
     }
 
     private static void injectCode(MethodVisitor writer) {
-        writer.visitFieldInsn(Opcodes.GETSTATIC, CLNAME_MCF, FNAME_MCF_EVBUS, FDESC_MCF_EVBUS);
-        writer.visitTypeInsn(Opcodes.NEW, CLNAME_PDE);
+        writer.visitFieldInsn(Opcodes.GETSTATIC, C_MinecraftForge, FN_MinecraftForge_EVENT_BUS, FD_MinecraftForge_EVENT_BUS);
+        writer.visitTypeInsn(Opcodes.NEW, C_PlayerDiggingEvent);
         writer.visitInsn(Opcodes.DUP);
         writer.visitVarInsn(Opcodes.ALOAD, 0);
-        writer.visitFieldInsn(Opcodes.GETFIELD, CLNAME_NHPS, FNAME_NHPS_PLAYER, FDESC_NHPS_PLAYER);
+        writer.visitFieldInsn(Opcodes.GETFIELD, C_NetHandlerPlayServer, FN_NetHandlerPlayServer_player, FD_NetHandlerPlayServer_player);
         writer.visitVarInsn(Opcodes.ALOAD, 1);
-        writer.visitMethodInsn(Opcodes.INVOKESPECIAL, CLNAME_PDE, "<init>", MDESC_PDE_INIT, false);
-        writer.visitMethodInsn(Opcodes.INVOKEVIRTUAL, CLNAME_EVBUS, MNAME_EVBUS_POST, MDESC_EVBUS_POST, false);
+        writer.visitMethodInsn(Opcodes.INVOKESPECIAL, C_PlayerDiggingEvent, "<init>", MD_PlayerDiggingEvent_new, false);
+        writer.visitMethodInsn(Opcodes.INVOKEVIRTUAL, C_EventBus, MN_EventBus_post, MD_EventBus_post, false);
         Label notCancelled = new Label();
         writer.visitJumpInsn(Opcodes.IFEQ, notCancelled);
         writer.visitInsn(Opcodes.RETURN);

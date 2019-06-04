@@ -1,0 +1,57 @@
+{
+  "deus": "ex",
+  "lodmesh_file": "assault_gun/assault_gun_3rd.lodmesh",
+  "stateless": true,
+  "pose": {
+    "x": 0.5,
+    "y": 0.35,
+    "z": -0.5,
+    "yaw": 90,
+    "roll": 0,
+    "pitch": -100
+  },
+  "scale": {
+    "x": 0.75,
+    "y": 0.75,
+    "z": 0.75
+  },
+  "textures": {
+    "AssaultGunTex1": "assault_gun/assault_gun_3rd_tex_1",
+    "MuzzleFlash1": "muzzle_flash_1",
+    "MuzzleFlash2": "muzzle_flash_2"
+  },
+  "particleTexture": "AssaultGunTex1",
+  "skins": [
+    {
+      "texture": "AssaultGunTex1"
+    },
+    {
+      "texture": "AssaultGunTex1"
+    },
+    [
+      {
+        "hidden": true
+      },
+      {
+        "texture": "MuzzleFlash1",
+        "alpha": 0.8,
+        "ignore_light": true,
+        "duration": 100,
+        "next": 0
+      },
+      {
+        "texture": "MuzzleFlash2",
+        "alpha": 0.8,
+        "ignore_light": true,
+        "duration": 100,
+        "next": 0
+      }
+    ]
+  ],
+  "sequences": {
+    "still": {
+      "startFrame": 0,
+      "frames": 1
+    }
+  }
+}

@@ -24,8 +24,9 @@
       "ghost": "supplant aquinas:null"
     },
     "in_world": {
-      "true": "supplant aquinas:item/assault_gun/assault_gun_model",
-      "false": {}
+      "first": "supplant aquinas:item/assault_gun/assault_gun_model",
+      "third": "supplant aquinas:item/assault_gun/assault_gun_3rd",
+      "none": {}
     }
   }
 }
