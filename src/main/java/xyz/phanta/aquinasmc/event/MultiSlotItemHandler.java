@@ -10,8 +10,10 @@ import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -45,6 +47,17 @@ public class MultiSlotItemHandler {
                         return;
                     }
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onDropItem(ItemTossEvent event) {
+        //noinspection ConstantConditions
+        if (event.getEntityItem().getThrower() == null) {
+            ItemStack stack = event.getEntityItem().getItem();
+            if (stack.getItem() instanceof ItemMultiSlot && !stack.getItem().onDroppedByPlayer(stack, event.getPlayer())) {
+                event.setCanceled(true);
             }
         }
     }
@@ -87,7 +100,7 @@ public class MultiSlotItemHandler {
                                     event.setCanceled(true);
                                 }
                             }
-                        } else {
+                        } else if (slotIndex < 36) {
                             if (held.getItem() instanceof ItemMultiSlot) {
                                 ItemMultiSlot item = (ItemMultiSlot)held.getItem();
                                 if (item.fitsInSlot(inv, slotIndex)) {
@@ -104,6 +117,8 @@ public class MultiSlotItemHandler {
                                     event.setCanceled(true);
                                 }
                             }
+                        } else {
+                            event.setCanceled(true);
                         }
                         break;
                     }
@@ -182,11 +197,20 @@ public class MultiSlotItemHandler {
                         break;
                     }
                 }
-            } else if (event.clickType == ClickType.QUICK_MOVE) {
+            } else if (event.clickType == ClickType.QUICK_MOVE || event.clickType == ClickType.SWAP) {
                 ItemStack stack = slot.getStack();
                 if (stack.getItem() instanceof ItemMultiSlot) {
                     event.setCanceled(true);
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerDiggingPacket(PlayerDiggingEvent event) {
+        if (event.action == CPacketPlayerDigging.Action.SWAP_HELD_ITEMS) {
+            if (event.player.getHeldItemMainhand().getItem() instanceof ItemMultiSlot) {
+                event.setCanceled(true);
             }
         }
     }
@@ -252,7 +276,7 @@ public class MultiSlotItemHandler {
             if (slot != null && slot.inventory == player.inventory) {
                 int slotIndex = slot.getSlotIndex();
                 ItemStack held = player.inventory.getItemStack();
-                if (slotIndex >= 9) {
+                if (slotIndex >= 9 && slotIndex < 36) {
                     if (held.getItem() instanceof ItemMultiSlot) {
                         ItemMultiSlot item = (ItemMultiSlot)held.getItem();
                         drawSelection(gui, slot, item.getDimX(), item.getDimY(), item.fitsInSlot(player.inventory, slotIndex));

@@ -149,7 +149,9 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
                 }
             }
         }
-        setItemPlaced(baseStack, false);
+        if (!baseStack.isEmpty()) {
+            setItemPlaced(baseStack, false);
+        }
         return baseStack;
     }
 
@@ -172,10 +174,43 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
 
     @Override
     public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
+        int slot = player.inventory.getSlotFor(item);
+        if (slot == -1) {
+            int meta = item.getMetadata();
+            if (meta == 0) {
+                setItemPlaced(item, false);
+                for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
+                    ItemStack stack = player.inventory.getStackInSlot(i);
+                    if (stack.getItem() instanceof ItemMultiSlot && stack.getMetadata() != 0) {
+                        int baseSlot = ((ItemMultiSlot)stack.getItem()).getBaseSlot(i, stack.getMetadata());
+                        if (player.inventory.getStackInSlot(baseSlot).isEmpty()) {
+                            slot = i;
+                            break;
+                        }
+                    }
+                }
+            } else if (meta != proxyMeta) {
+                for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
+                    ItemStack stack = player.inventory.getStackInSlot(i);
+                    if (stack.getItem() instanceof ItemMultiSlot && stack.getMetadata() == 0) {
+                        int childSlot = i + getYCoordForMeta(meta) * 9 + getXCoordForMeta(meta);
+                        if (player.inventory.getStackInSlot(childSlot).isEmpty()) {
+                            slot = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         if (getProxyDestination(item) != -1) {
-            int slot = player.inventory.getSlotFor(item);
             onProxyDestroyed(player, slot, item);
-            player.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+            if (slot != -1) {
+                player.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+            }
+            return false;
+        } else if (slot != -1) {
+            ItemStack baseStack = clearFromSlot(player.inventory, slot);
+            player.dropItem(baseStack.isEmpty() ? item : baseStack, false, true);
             return false;
         }
         return true;

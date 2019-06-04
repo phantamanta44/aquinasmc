@@ -119,5 +119,9 @@ public class WeaponModel {
     }
 
     // TODO weapon mods
+    // TODO recoil
+    // TODO accuracy
+    // TODO proper projectiles
+    // TODO shell casings
 
 }

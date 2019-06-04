@@ -10,7 +10,10 @@ public class DXCoreMod implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[] { SlotClickTransformer.class.getCanonicalName() };
+        return new String[] {
+                SlotClickTransformer.class.getCanonicalName(),
+                PlayerDiggingTransformer.class.getCanonicalName()
+        };
     }
 
     @Nullable
