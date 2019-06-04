@@ -1,5 +1,111 @@
 {
   "deus": "ex",
-  "aniv_file": "aquinas:AssaultGun_a.3d",
-  "vert_file": "aquinas:AssaultGun_d.3d"
+  "lodmesh_file": "assaultgun.lodmesh",
+  "pose": {
+    "x": 0.4,
+    "y": 0.35,
+    "z": -0.5,
+    "yaw": -20,
+    "roll": 0,
+    "pitch": -100
+  },
+  "scale": {
+    "x": -1,
+    "y": 1,
+    "z": 1
+  },
+  "textures": {
+    "AssaultGunTex1": "assault_gun_tex_1",
+    "MuzzleFlash1": "muzzle_flash_1",
+    "MuzzleFlash2": "muzzle_flash_2"
+  },
+  "particleTexture": "AssaultGunTex1",
+  "skins": [
+    {
+      "hidden": true
+    },
+    {
+      "texture": "AssaultGunTex1"
+    },
+    [
+      {
+        "hidden": true
+      },
+      {
+        "texture": "MuzzleFlash1",
+        "alpha": 0.8,
+        "ignore_light": true,
+        "duration": 100,
+        "next": 0
+      },
+      {
+        "texture": "MuzzleFlash2",
+        "alpha": 0.8,
+        "ignore_light": true,
+        "duration": 100,
+        "next": 0
+      }
+    ],
+    {
+      "hidden": true
+    }
+  ],
+  "sequences": {
+    "still": {
+      "startFrame": 0,
+      "frames": 1
+    },
+    "equip": {
+      "startFrame": 1,
+      "frames": 8,
+      "rate": 18,
+      "next": "idle1"
+    },
+    "shoot": {
+      "startFrame": 9,
+      "frames": 3,
+      "rate": 18,
+      "next": "idle1"
+    },
+    "reload_start": {
+      "startFrame": 17,
+      "frames": 5,
+      "rate": 10,
+      "next": "reload_during"
+    },
+    "reload_during": {
+      "startFrame": 22,
+      "frames": 7,
+      "rate": 5
+    },
+    "reload_end": {
+      "startFrame": 29,
+      "frames": 3,
+      "rate": 10,
+      "next": "idle1"
+    },
+    "down": {
+      "startFrame": 32,
+      "frames": 5,
+      "rate": 10
+    },
+    "idle1": {
+      "startFrame": 37,
+      "frames": 8,
+      "rate": 2,
+      "next": "idle2"
+    },
+    "idle2": {
+      "startFrame": 45,
+      "frames": 8,
+      "rate": 2,
+      "next": "idle3"
+    },
+    "idle3": {
+      "startFrame": 53,
+      "frames": 8,
+      "rate": 2,
+      "next": "idle1"
+    }
+  }
 }

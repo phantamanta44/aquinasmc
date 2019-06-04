@@ -32,14 +32,15 @@ repositories {
 }
 
 dependencies {
-    compile 'io.github.phantamanta44.libnine:libnine-1.12.2:1.0.3'
+    compile 'io.github.phantamanta44.libnine:libnine-1.12.2:1.0.4'
 }
 
 jar {
     manifest {
         attributes(
                 'FMLCorePluginContainsFMLMod': 'true',
-                'FMLCorePlugin': 'xyz.phanta.aquinasmc.coremod.DXCoreMod'
+                'FMLCorePlugin': 'xyz.phanta.aquinasmc.coremod.DXCoreMod',
+                'FMLAT': 'aquinas_at.cfg'
         )
     }
 }
@@ -61,4 +62,6 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+
+    rename 'aquinas_at.cfg', 'META-INF/aquinas_at.cfg'
 }

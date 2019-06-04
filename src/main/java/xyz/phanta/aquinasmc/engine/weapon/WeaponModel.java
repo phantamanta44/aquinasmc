@@ -4,6 +4,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import xyz.phanta.aquinasmc.client.model.DXModel;
 import xyz.phanta.aquinasmc.constant.NbtConst;
 import xyz.phanta.aquinasmc.engine.weapon.ammo.AmmoType;
 import xyz.phanta.aquinasmc.sound.DXSounds;
@@ -96,14 +97,25 @@ public class WeaponModel {
 
     public void onReloadStart(EntityPlayer player, ItemStack weapon) {
         player.world.playSound(player, player.posX, player.posY, player.posZ, soundReloadStart, SoundCategory.PLAYERS, 1F, 1F);
+        DXModel.setSequence(player, weapon, "reload_start");
+        DXModel.setSkinState(player, weapon, 2, 0);
     }
 
     public void onReloadEnd(EntityPlayer player, ItemStack weapon) {
         player.world.playSound(player, player.posX, player.posY, player.posZ, soundReloadEnd, SoundCategory.PLAYERS, 1F, 1F);
+        DXModel.setSequence(player, weapon, "reload_end");
     }
 
     public void onEquipped(EntityPlayer player, ItemStack weapon) {
         player.world.playSound(player, player.posX, player.posY, player.posZ, soundEquip, SoundCategory.PLAYERS, 1F, 1F);
+        DXModel.setSequence(player, weapon, "equip");
+        DXModel.setSkinState(player, weapon, 2, 0);
+    }
+
+    public void fire(EntityPlayer player, ItemStack weapon) {
+        getAmmoType(weapon).fire(player, weapon);
+        DXModel.setSequence(player, weapon, "shoot");
+        DXModel.setSkinState(player, weapon, 2, player.world.rand.nextInt(2) + 1);
     }
 
     // TODO weapon mods

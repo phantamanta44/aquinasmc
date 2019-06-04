@@ -3,7 +3,6 @@ package xyz.phanta.aquinasmc.item.base;
 import io.github.phantamanta44.libnine.capability.provider.CapabilityBroker;
 import io.github.phantamanta44.libnine.client.model.ParameterizedItemModel;
 import io.github.phantamanta44.libnine.item.L9ItemSubs;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,11 +12,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 import xyz.phanta.aquinasmc.capability.DXCapabilities;
 import xyz.phanta.aquinasmc.capability.ProxyItem;
+import xyz.phanta.aquinasmc.client.model.DXModel;
 import xyz.phanta.aquinasmc.constant.NbtConst;
 import xyz.phanta.aquinasmc.util.SafeNbt;
 
@@ -30,7 +27,7 @@ import java.util.UUID;
 public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.IParamaterized {
 
     private final int dimX, dimY;
-    private final int proxyMeta;
+    protected final int proxyMeta;
 
     public ItemMultiSlot(String name, int dimX, int dimY) {
         super(name, dimX * dimY + 1);
@@ -244,20 +241,6 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
             this.stack = stack;
         }
 
-        private EntityPlayer getPlayer() {
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-                return Minecraft.getMinecraft().player;
-            } else {
-                return FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList()
-                        .getPlayerByUUID(getProxyOwner(stack));
-            }
-        }
-
-        @Override
-        public InventoryPlayer getInventory() {
-            return getPlayer().inventory;
-        }
-
         @Override
         public int getBaseSlot() {
             return getProxyDestination(stack);
@@ -269,8 +252,64 @@ public class ItemMultiSlot extends L9ItemSubs implements ParameterizedItemModel.
         }
 
         @Override
-        public void onProxyDestroyed() {
-            item.onProxyDestroyed(getPlayer(), getProxySlot(), stack);
+        public void onProxyDestroyed(EntityPlayer player) {
+            item.onProxyDestroyed(player, getProxySlot(), stack);
+        }
+
+    }
+
+    public static class ProxyModelItem implements DXModel.DXModelItem {
+
+        private static final DXModel.DXModelItem NOOP_MODEL_ITEM = new DXModel.DXModelItem.Impl();
+        private final ItemStack proxyStack;
+
+        public ProxyModelItem(ItemStack proxyStack) {
+            this.proxyStack = proxyStack;
+        }
+
+        @Override
+        public boolean requiresPlayer() {
+            return true;
+        }
+
+        private DXModel.DXModelItem getDelegate(@Nullable EntityPlayer player) {
+            if (player == null) {
+                throw new UnsupportedOperationException();
+            }
+            DXModel.DXModelItem modelItem = Objects.requireNonNull(proxyStack.getCapability(DXCapabilities.PROXY_ITEM, null))
+                    .getBaseStack(player).getCapability(DXModel.ANIM_CAP, null);
+            return modelItem != null ? modelItem : NOOP_MODEL_ITEM;
+        }
+
+        @Override
+        public UUID getIdentifier(@Nullable EntityPlayer player) {
+            return getDelegate(player).getIdentifier(player);
+        }
+
+        @Nullable
+        @Override
+        public String getSequence(@Nullable EntityPlayer player) {
+            return getDelegate(player).getSequence(player);
+        }
+
+        @Override
+        public void setSequence(@Nullable EntityPlayer player, String sequence) {
+            getDelegate(player).setSequence(player, sequence);
+        }
+
+        @Override
+        public int getSkinState(@Nullable EntityPlayer player, int skin) {
+            return getDelegate(player).getSkinState(player, skin);
+        }
+
+        @Override
+        public void setSkinState(@Nullable EntityPlayer player, int skin, int state) {
+            getDelegate(player).setSkinState(player, skin, state);
+        }
+
+        @Override
+        public byte getActionIndex(@Nullable EntityPlayer player) {
+            return getDelegate(player).getActionIndex(player);
         }
 
     }

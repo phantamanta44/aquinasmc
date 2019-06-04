@@ -21,6 +21,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import xyz.phanta.aquinasmc.Aquinas;
 import xyz.phanta.aquinasmc.capability.AmmoStock;
 import xyz.phanta.aquinasmc.capability.DXCapabilities;
+import xyz.phanta.aquinasmc.client.model.DXModel;
 import xyz.phanta.aquinasmc.constant.NbtConst;
 import xyz.phanta.aquinasmc.engine.weapon.WeaponModel;
 import xyz.phanta.aquinasmc.engine.weapon.ammo.AmmoType;
@@ -50,13 +51,24 @@ public class ItemWeapon extends ItemMultiSlot {
     @Override
     public CapabilityBroker initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
         return super.initCapabilities(stack, nbt)
-                .with(DXCapabilities.AMMO_USER, new WeaponAmmoStock(this, stack));
+                .with(DXCapabilities.AMMO_USER, new WeaponAmmoStock(this, stack))
+                .with(DXModel.ANIM_CAP, stack.getMetadata() == proxyMeta
+                        ? new ProxyModelItem(stack)
+                        : new DXModel.DXModelItem.ForStack(stack, "idle1"));
     }
 
     @Override
     public void getModelMutations(ItemStack stack, @Nullable World world, @Nullable EntityLivingBase holder, ParameterizedItemModel.Mutation m) {
         super.getModelMutations(stack, m);
-        m.mutate("in_world", world != null ? "true" : "false");
+        if (world != null) {
+            if (holder != null) {
+                m.mutate("in_world", "true");
+            } else {
+                m.mutate("in_world", "false").mutate("role", "multi");
+            }
+        } else {
+            m.mutate("in_world", "false");
+        }
     }
 
     @Override
@@ -198,7 +210,7 @@ public class ItemWeapon extends ItemMultiSlot {
     }
 
     protected void fire(EntityPlayer player, ItemStack stack) {
-        model.getAmmoType(stack).fire(player, stack);
+        model.fire(player, stack);
     }
 
     protected int getReloadDuration(EntityPlayer player, ItemStack stack) {

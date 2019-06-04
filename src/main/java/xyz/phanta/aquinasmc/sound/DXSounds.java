@@ -1,13 +1,7 @@
 package xyz.phanta.aquinasmc.sound;
 
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import xyz.phanta.aquinasmc.Aquinas;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DXSounds {
 
@@ -19,16 +13,7 @@ public class DXSounds {
     public static final SoundEvent WEAPON_EMPTY_GUN = create(KEY_WEAPON_MISC + "empty_gun");
 
     public static SoundEvent create(String name) {
-        ResourceLocation loc = Aquinas.INSTANCE.newResourceLocation(name);
-        SoundEvent sound = new SoundEvent(loc);
-//        sound.setRegistryName(loc);
-//        toRegister.add(sound);
-        return sound;
+        return new SoundEvent(Aquinas.INSTANCE.newResourceLocation(name));
     }
-
-//    @SubscribeEvent
-//    public void registerSounds(RegistryEvent.Register<SoundEvent> event) {
-//        event.getRegistry().registerAll(toRegister.toArray(new SoundEvent[0]));
-//    }
 
 }

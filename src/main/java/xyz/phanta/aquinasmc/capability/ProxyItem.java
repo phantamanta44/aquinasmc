@@ -1,24 +1,21 @@
 package xyz.phanta.aquinasmc.capability;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 
 public interface ProxyItem {
-
-    InventoryPlayer getInventory();
 
     int getBaseSlot();
 
     int getProxySlot();
 
-    void onProxyDestroyed();
+    void onProxyDestroyed(EntityPlayer player);
+
+    default ItemStack getBaseStack(EntityPlayer player) {
+        return player.inventory.getStackInSlot(getBaseSlot());
+    }
 
     class DefaultImpl implements ProxyItem {
-
-        @Override
-        public InventoryPlayer getInventory() {
-            return Minecraft.getMinecraft().player.inventory;
-        }
 
         @Override
         public int getBaseSlot() {
@@ -31,8 +28,13 @@ public interface ProxyItem {
         }
 
         @Override
-        public void onProxyDestroyed() {
+        public void onProxyDestroyed(EntityPlayer player) {
             // NO-OP
+        }
+
+        @Override
+        public ItemStack getBaseStack(EntityPlayer player) {
+            return ItemStack.EMPTY;
         }
 
     }

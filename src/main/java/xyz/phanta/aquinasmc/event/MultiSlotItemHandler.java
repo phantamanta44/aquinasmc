@@ -1,7 +1,6 @@
 package xyz.phanta.aquinasmc.event;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -57,7 +56,7 @@ public class MultiSlotItemHandler {
             for (int i = 0; i < 9; i++) {
                 ItemStack stack = player.inventory.getStackInSlot(i);
                 if (stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
-                    Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null)).onProxyDestroyed();
+                    Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null)).onProxyDestroyed(player);
                     player.inventory.setInventorySlotContents(i, ItemStack.EMPTY);
                 }
             }
@@ -82,7 +81,7 @@ public class MultiSlotItemHandler {
                                 ItemStack stack = inv.getStackInSlot(slotIndex);
                                 if (stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
                                     Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null))
-                                            .onProxyDestroyed();
+                                            .onProxyDestroyed(inv.player);
                                     inv.setInventorySlotContents(slotIndex, held);
                                     inv.setItemStack(ItemStack.EMPTY);
                                     event.setCanceled(true);
@@ -115,7 +114,7 @@ public class MultiSlotItemHandler {
                             if (slotIndex < 9) {
                                 if (stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
                                     Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null))
-                                            .onProxyDestroyed();
+                                            .onProxyDestroyed(inv.player);
                                     inv.setInventorySlotContents(slotIndex, ItemStack.EMPTY);
                                 }
                             } else if (!(event.container instanceof ContainerPlayer)) {
@@ -157,7 +156,7 @@ public class MultiSlotItemHandler {
                                 if (stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
                                     ProxyItem proxy = Objects.requireNonNull(
                                             stack.getCapability(DXCapabilities.PROXY_ITEM, null));
-                                    ItemStack baseStack = proxy.getInventory().getStackInSlot(proxy.getBaseSlot());
+                                    ItemStack baseStack = proxy.getBaseStack(inv.player);
                                     inv.setItemStack(
                                             ItemHandlerHelper.copyStackWithSize(baseStack, baseStack.getMaxStackSize()));
                                     event.setCanceled(true);
@@ -229,9 +228,9 @@ public class MultiSlotItemHandler {
                     }
                 } else if (held.isEmpty() && stack.hasCapability(DXCapabilities.PROXY_ITEM, null)) {
                     ProxyItem proxy = Objects.requireNonNull(stack.getCapability(DXCapabilities.PROXY_ITEM, null));
-                    Slot baseSlot = gui.inventorySlots.getSlotFromInventory(proxy.getInventory(), proxy.getBaseSlot());
+                    Slot baseSlot = gui.inventorySlots.getSlotFromInventory(player.inventory, proxy.getBaseSlot());
                     if (baseSlot != null) {
-                        ItemStack base = proxy.getInventory().getStackInSlot(proxy.getBaseSlot());
+                        ItemStack base = proxy.getBaseStack(player);
                         if (base.getItem() instanceof ItemMultiSlot) {
                             ItemMultiSlot item = (ItemMultiSlot)base.getItem();
                             drawSelection(gui, baseSlot, item.getDimX(), item.getDimY(), true);

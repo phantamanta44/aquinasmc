@@ -21,14 +21,10 @@
           }
         }
       },
-      "ghost": {
-        "parent": "aquinas:null"
-      }
+      "ghost": "supplant aquinas:null"
     },
     "in_world": {
-      "true": {
-        "parent": "aquinas:item/assault_gun_model"
-      },
+      "true": "supplant aquinas:item/assault_gun_model",
       "false": {}
     }
   }
