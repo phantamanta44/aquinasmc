@@ -117,7 +117,7 @@ public class MultiSlotItemHandler {
                                     event.setCanceled(true);
                                 }
                             }
-                        } else {
+                        } else if (held.getItem() instanceof ItemMultiSlot) {
                             event.setCanceled(true);
                         }
                         break;
