@@ -15,6 +15,7 @@ import xyz.phanta.aquinasmc.client.model.DXModelLoader;
 public class ModelLightingHandler {
 
     private final DXModelLoader modelLoader;
+    private boolean lightMapChanged = false;
 
     public ModelLightingHandler(DXModelLoader modelLoader) {
         this.modelLoader = modelLoader;
@@ -30,7 +31,8 @@ public class ModelLightingHandler {
                 modelLoader.setLighting(Minecraft.getMinecraft().entityRenderer.lightmapColors[y * 16 + x]);
                 RenderUtils.enableFullBrightness();
                 RenderHelper.disableStandardItemLighting();
-            } else {
+                lightMapChanged = true;
+            } else if (lightMapChanged) {
                 RenderUtils.restoreLightmap();
                 RenderHelper.enableStandardItemLighting();
             }
