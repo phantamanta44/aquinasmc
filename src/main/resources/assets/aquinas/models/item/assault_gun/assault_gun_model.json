@@ -1,6 +1,6 @@
 {
   "deus": "ex",
-  "lodmesh_file": "assaultgun.lodmesh",
+  "lodmesh_file": "assault_gun/assault_gun.lodmesh",
   "pose": {
     "x": 0.4,
     "y": 0.35,
@@ -15,7 +15,7 @@
     "z": 1
   },
   "textures": {
-    "AssaultGunTex1": "assault_gun_tex_1",
+    "AssaultGunTex1": "assault_gun/assault_gun_tex_1",
     "MuzzleFlash1": "muzzle_flash_1",
     "MuzzleFlash2": "muzzle_flash_2"
   },

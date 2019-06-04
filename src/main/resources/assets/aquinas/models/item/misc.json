@@ -7,77 +7,77 @@
     "type": {
       "AMMO_10MM": {
         "textures": {
-          "layer0": "aquinas:item/ammo_10mm"
+          "layer0": "aquinas:item/ammo/ammo_10mm"
         }
       },
       "AMMO_HE": {
         "textures": {
-          "layer0": "aquinas:item/ammo_he"
+          "layer0": "aquinas:item/ammo/ammo_he"
         }
       },
       "AMMO_762": {
         "textures": {
-          "layer0": "aquinas:item/ammo_762"
+          "layer0": "aquinas:item/ammo/ammo_762"
         }
       },
       "AMMO_3006": {
         "textures": {
-          "layer0": "aquinas:item/ammo_3006"
+          "layer0": "aquinas:item/ammo/ammo_3006"
         }
       },
       "AMMO_DARTS_FLARE": {
         "textures": {
-          "layer0": "aquinas:item/ammo_darts_flare"
+          "layer0": "aquinas:item/ammo/ammo_darts_flare"
         }
       },
       "AMMO_DARTS_NORMAL": {
         "textures": {
-          "layer0": "aquinas:item/ammo_darts_normal"
+          "layer0": "aquinas:item/ammo/ammo_darts_normal"
         }
       },
       "AMMO_DARTS_POISON": {
         "textures": {
-          "layer0": "aquinas:item/ammo_darts_poison"
+          "layer0": "aquinas:item/ammo/ammo_darts_poison"
         }
       },
       "AMMO_NAPALM": {
         "textures": {
-          "layer0": "aquinas:item/ammo_napalm"
+          "layer0": "aquinas:item/ammo/ammo_napalm"
         }
       },
       "AMMO_PEPPER": {
         "textures": {
-          "layer0": "aquinas:item/ammo_pepper"
+          "layer0": "aquinas:item/ammo/ammo_pepper"
         }
       },
       "AMMO_PLASMA": {
         "textures": {
-          "layer0": "aquinas:item/ammo_plasma"
+          "layer0": "aquinas:item/ammo/ammo_plasma"
         }
       },
       "AMMO_PROD": {
         "textures": {
-          "layer0": "aquinas:item/ammo_prod"
+          "layer0": "aquinas:item/ammo/ammo_prod"
         }
       },
       "AMMO_ROCKETS": {
         "textures": {
-          "layer0": "aquinas:item/ammo_rockets"
+          "layer0": "aquinas:item/ammo/ammo_rockets"
         }
       },
       "AMMO_SABOT": {
         "textures": {
-          "layer0": "aquinas:item/ammo_sabot"
+          "layer0": "aquinas:item/ammo/ammo_sabot"
         }
       },
       "AMMO_SHELLS": {
         "textures": {
-          "layer0": "aquinas:item/ammo_shells"
+          "layer0": "aquinas:item/ammo/ammo_shells"
         }
       },
       "AMMO_WPROCKETS": {
         "textures": {
-          "layer0": "aquinas:item/ammo_wprockets"
+          "layer0": "aquinas:item/ammo/ammo_wprockets"
         }
       },
       "AUG_UPGRADE": {
